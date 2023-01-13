@@ -1,5 +1,6 @@
 !sample.env
 .env
+mysql
 
 # compiled output
 /dist

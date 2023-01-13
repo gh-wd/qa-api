@@ -1,4 +1,5 @@
 # https://www.tomray.dev/nestjs-docker-compose-postgres
+name: qa-service
 services:
   api:
     build:
@@ -14,3 +15,30 @@ services:
     command: npm run start:dev
     ports:
       - 3000:3000
+    networks:
+      - local-network
+    depends_on:
+      - db
+  db:
+    image: mysql:8.0
+    ports:
+      - ${MYSQL_OUTER_PORT}:${MYSQL_INNER_PORT}
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: qa-db
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - local-network
+  db-viewer:
+    image: adminer:latest
+    environment:
+      ADMINER_DEFAULT_SERVER: qa-db
+    ports:
+      - ${DB_VIEWER_OUTER_PORT}:${DB_VIEWER_INNER_PORT}
+    networks:
+      - local-network
+networks:
+  local-network:
+    driver: bridge
