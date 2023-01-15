@@ -18,19 +18,24 @@ services:
     networks:
       - local-network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     image: mysql:8.0
     ports:
       - ${MYSQL_OUTER_PORT}:${MYSQL_INNER_PORT}
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: qa-db
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
       - local-network
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=${MYSQL_ROOT_PASSWORD} --execute \"SHOW DATABASES;\""
+      interval: 5s
+      timeout: 5s
+      retries: 20
   db-viewer:
     image: adminer:latest
     environment:
